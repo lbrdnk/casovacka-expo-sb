@@ -24,10 +24,19 @@ if (parameters) {
   addParameters(parameters);
 }
 
-argsEnhancers.forEach((enhancer) => addArgsEnhancer(enhancer));
+// temporary fix for https://github.com/storybookjs/react-native/issues/327 whilst the issue is investigated
+try {
+  argsEnhancers.forEach((enhancer) => addArgsEnhancer(enhancer));
+} catch {}
 
 const getStories = () => {
-  return [require("../components/Button/Button.stories.tsx")];
+  return [
+    require("../src/ts/ui/components/Accordion/Accordion.stories.tsx"),
+    require("../src/ts/ui/components/Button/Button.stories.tsx"),
+    require("../src/ts/ui/components/Stopwatch/Stopwatch.stories.tsx"),
+    require("../src/ts/ui/components/StopwatchScreen/StopwatchScreen.stories.tsx"),
+    require("../src/ts/ui/components/TimerSelector/TimerSelector.stories.tsx"),
+  ];
 };
 
 configure(getStories, module, false);
