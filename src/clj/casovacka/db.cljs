@@ -6,7 +6,7 @@
 (def stretch-timer-map
   {:id #uuid "e2838bd3-7f5c-4c17-b400-76c672a035a1"
    :name "Stretching Routine"
-   :color "red"
+   :color "pink"
    :activities
    {:order
     [#uuid "db241319-f54e-4ebb-a2e3-06efbed67807"]
@@ -33,7 +33,7 @@
 (def simple-timer-map
   {:id #uuid "d48fe293-0fbb-43e7-aae2-febbca34b015"
    :name "Daily workout"
-   :color "green"
+   :color "lightgreen"
    :activities
    {:order
     [#uuid "f6dac085-b56a-4e90-a0cc-322548cae7dd"
@@ -99,7 +99,7 @@
 
 (def test-timer-map {:id #uuid "55450ea9-f6bf-4670-a470-e1488eff4809"
                      :name "Test timer"
-                     :color "orange"
+                     :color "lightyellow"
                      :activities
                      {:order [#uuid "a0c5e5b8-d605-4c3b-a833-6f08d096ca93"]
                       :data

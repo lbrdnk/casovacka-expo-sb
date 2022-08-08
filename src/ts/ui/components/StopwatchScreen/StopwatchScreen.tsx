@@ -1,6 +1,10 @@
+import { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import useReanimatedBg from "../../hooks/useReanimatedBg";
 import { Stopwatch } from "../Stopwatch/Stopwatch";
 import TimerSelector from "../TimerSelector/TimerSelector";
+
+import Animated from "react-native-reanimated";
 
 interface StopwatchScreenProps {
 
@@ -14,12 +18,20 @@ export const StopwatchScreen = (props) => {
         startTimerFn,
         stopTimerFn,
         resetTimerFn,
+        activeColor,
         // isTimerCleared,
      } = props;
     // const currentTimer = find
     // console.log(props)
+
+    const {style, setBgColor} = useReanimatedBg();
+
+    useEffect(() => {
+        setBgColor(activeColor);
+    }, [activeColor])
+
     return (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, style]}>
             <Stopwatch
                 // timer={currentTimer}
                 // timer={}
@@ -32,8 +44,9 @@ export const StopwatchScreen = (props) => {
             <TimerSelector
                 timers={timers}
                 selectTimerFn={selectTimerFn}
+                activeColor={activeColor}
             />
-        </View>
+        </Animated.View>
     )
 }
 

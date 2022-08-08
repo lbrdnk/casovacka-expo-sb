@@ -1,251 +1,191 @@
-import { useCallback, useEffect } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
-import Ionicons from '@expo/vector-icons/Ionicons';
-
-import Accordion from "../Accordion/Accordion";
-
-import { getHeaderTitle } from '@react-navigation/elements';
-import { Header } from '@react-navigation/elements';
-
+import { useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity } from "react-native"
 import Animated, {
-    interpolateColor,
-    useAnimatedStyle,
-    useDerivedValue,
-    useSharedValue,
-    withTiming
+    FadeIn,
+    FadeInUp,
+    FadeOut,
+    FadeOutUp,
+    Layout,
+    SlideInLeft,
+    SlideInRight,
+    SlideOutLeft,
 } from "react-native-reanimated";
 
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-const TimerSelectorItemHeader2 = (props) => {
-    const { name, isActive, cleared, timeLeftStr } = props;
-    const rotation = useSharedValue(0);
-    const iconContainerStyle = useAnimatedStyle(() => ({
-        transform: [{ rotateZ: rotation.value + "deg" }]
-    }), [])
-    useEffect(() => {
-        if (isActive) {
-            rotation.value = withTiming(90, { duration: 300 })
-        } else {
-            rotation.value = withTiming(0, { duration: 300 })
-        }
-    }, [isActive])
+import useReanimatedBg from "../../hooks/useReanimatedBg"
+
+import Button from "../Button/Button";
+
+
+const TimerSelectorItem = (props) => {
+
+    const {
+        timer: { name, isSelected, selectTimerFn, color,
+            currentActivityName,
+            currentIntervalName,
+            nextActivityName,
+            nextIntervalName,
+            isTimerRunning,
+            cleared,
+            running
+        },
+    } = props;
+
+    // next interval name aj current interval name ked neni -- znamena ze nejsu
+    // setnute intervaly
+    // -> naju sa zobrazovat len mena aktivit
+
     return (
-        <View
-            style={
-                timerSelectorItemHeaderStyles.container
-            }
+        <TouchableOpacity
+            onPress={selectTimerFn}
         >
-
             <Animated.View
-                style={iconContainerStyle}
+                style={[
+                    {
+                        // borderWidth: 16,
+                        // borderBottomColor: "transparent",
+                        // borderRightColor: "transparent",
+                        // borderTopColor: "white",
+                        // borderLeftColor: "white",
+                    },
+                    { minHeight: 64, backgroundColor: color, padding: 16 }
+                ]}
+                entering={SlideInLeft}
+                exiting={SlideOutLeft}
+                layout={Layout}
             >
-                <Ionicons name="caret-forward" size={20} color="black" />
+
+                {/* header */}
+                <Animated.View style={{ flexDirection: "row", alignItems: "center" }}>
+
+                    {!cleared ? (
+
+
+                        running ? (
+                            <Animated.View
+                                key="kokot1"
+                                entering={FadeIn}
+                                exiting={FadeOut}
+                            // layout={Layout}
+                            >
+                                <Ionicons name="play" size={20} />
+                            </Animated.View>
+                        ) : (
+                            <Animated.View
+                                key="kokot2"
+                                entering={FadeIn}
+                                exiting={FadeOut}
+                            // layout={Layout}
+                            >
+                                <Ionicons name="stop" size={20} />
+                            </Animated.View>
+                        )
+
+                    ) : null}
+
+                    <Animated.Text
+                        // entering={FadeInUp}
+                        // exiting={FadeOutUp}
+                        layout={Layout}
+                        style={[{ marginLeft: 8 },
+                        timerSelectorItemStyles.headerText]}
+                    >
+                        {name}
+                    </Animated.Text>
+                </Animated.View>
+                {isSelected ? (
+                    <Animated.View
+                        // style={{ backgroundColor: color }}
+                        entering={FadeInUp}
+                        exiting={FadeOutUp}
+                        layout={Layout}
+                    >
+                        <Animated.View
+                            style={{
+                                backgroundColor: "lightcyan",
+                                flexDirection: "row",
+                                justifyContent: "space-evenly",
+                                marginBottom: 16
+                            }}
+                        >
+                            <Text>{currentActivityName}</Text>
+                            <Text>{nextActivityName}</Text>
+                        </Animated.View>
+                        <Animated.View
+                            style={{
+                                backgroundColor: "yellow",
+                                flexDirection: "row",
+                                justifyContent: "space-evenly",
+                            }}
+                        >
+                            <Animated.Text
+                                key={currentIntervalName}
+                                entering={SlideInRight}
+                                exiting={SlideOutLeft}
+                                layout={Layout}
+                            >
+                                {currentIntervalName}
+                            </Animated.Text>
+                            <Animated.Text
+                                key={nextIntervalName}
+                                entering={SlideInRight}
+                                exiting={SlideOutLeft}
+                                layout={Layout}
+                            >
+                                {nextIntervalName}
+                            </Animated.Text>
+                        </Animated.View>
+                    </Animated.View>
+                ) : null}
+                {/* content */}
+
             </Animated.View>
-            <View
-                style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}
-            >
-                <Text style={timerSelectorItemHeaderStyles.text}>{name}</Text>
-                {!cleared && <Text style={timerSelectorItemHeaderStyles.numText}>{timeLeftStr}</Text>}
-            </View>
-        </View>
+        </TouchableOpacity >
+
     )
-};
+}
 
-const colorActive = "#1ecbe1";
-const colorInactive = "#ecfbfc";
-const TimerSelectorItemHeader = (props) => {
-    console.log(props)
-    const { name, isActive, cleared, timeLeftStr, color = "#afafaf" } = props;
-
-    const progress = useDerivedValue(
-        () => isActive ? withTiming(1) : withTiming(0),
-        [isActive]
-    );
-    const rStyle = useAnimatedStyle(() => ({
-        backgroundColor: interpolateColor(
-            progress.value,
-            [0, 1],
-            [colorInactive, color]
-        ),
-    }))
-
-
+const renderTimerSelectorItem = ({ item, index, separators }) => {
     return (
-        <Animated.View
-            style={[{
-                margin: 8,
-            }, rStyle]}
-        >
-
-            <View
-                style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}
-            >
-                <Text style={timerSelectorItemHeaderStyles.text}>{name}</Text>
-                {!cleared && <Text style={timerSelectorItemHeaderStyles.numText}>{timeLeftStr}</Text>}
-            </View>
-        </Animated.View>
+        <TimerSelectorItem timer={item} />
     )
-};
-
-
-const TimerSelectorItemContent = (props) => {
-    const { 
-        name,
-        totalTimeStr,
-        timeLeftStr,
-        nextIntervalName,
-
-        isActive,
-        
-        currentIntervalName,
-        currentIntervalTimeLeftStr,
-        
-        currentActivityName,
-        currentActivityTimeLeftStr,
-     } = props;
-
-     const progress = useDerivedValue(
-        () => isActive ? withTiming(1) : withTiming(0),
-        [isActive]
-    );
-    const rStyle = useAnimatedStyle(() => ({
-        backgroundColor: interpolateColor(
-            progress.value,
-            [0, 1],
-            [colorInactive, colorActive]
-        ),
-    }))
-
-
-    // if not started, print something
-    //  console.log(props)
-    return (
-        <Animated.View style={[timerSelectorItemContentStyles.container, rStyle]}>
-
-            {currentActivityName && <Text>{"Current activity name " + currentActivityName}</Text>}
-            {currentActivityTimeLeftStr && <Text>{"Current activity time left " + currentActivityTimeLeftStr}</Text>}
-    
-            {currentIntervalName && <Text>{"Current interval name " + currentIntervalName}</Text>}
-            {currentIntervalTimeLeftStr && <Text>{"Current interval time left " + currentIntervalTimeLeftStr}</Text>}
-        </Animated.View>
-    )
-};
+}
 
 export const TimerSelector = (props) => {
 
     const {
-        selectTimerFn,
-        timers
+        timers,
     } = props;
 
-    const timersWithProps = timers
-        .map(timer => ({
-            ...timer,
-            onHeaderPressed: () => selectTimerFn(timer.id)
-        }));
-
-    const itemKeyExtractor = useCallback(({ id }) => id, [])
-
-    // here animated color bg for header / content
-    // -> container style bg color
+    const { style, setBgColor } = useReanimatedBg();
 
     return (
         <>
-        <Accordion
-            // containerStyle={timerSelectorStyles.container}
-            // itemContainerStyle={timerSelectorStyles.itemContainer}
-            itemKeyExtractor={itemKeyExtractor}
-            items={timersWithProps}
-            headerComponent={TimerSelectorItemHeader}
-            contentComponent={TimerSelectorItemContent}
-        />
+            <Animated.FlatList
+                data={timers}
+                renderItem={renderTimerSelectorItem}
+                keyExtractor={item => item.id}
+                // style={[style]}
+                itemLayoutAnimation={Layout.delay(0)}
+            />
         </>
     )
 }
 
-const timerSelectorStyles = StyleSheet.create({
-    container: {
-        // backgroundColor: "aquamarine"
-        borderWidth: 4,
-        
-    },
-    itemContainer: {
-        margin: 8,
-        // borderWidth: 1,
-        backgroundColor: "white",
-        // shadowOpacity: 0.08,
-        // shadowOffset: {
-        //     width: 5,
-        //     height: 0
-        // },
-        // shadowRadius: 5
-    }
-})
-
-const timerSelectorItemHeaderStyles = StyleSheet.create({
-    container: {
+const timerSelectorItemStyles = StyleSheet.create({
+    headerContainer: {
         flexDirection: "row",
         alignItems: "center",
         height: 64,
         width: "100%",
         padding: 8,
     },
-    text: {
-        fontSize: 18,
-        // fontFamily: "sans"
+    headerText: {
+        fontSize: 20,
+        lineHeight: 32
     },
-    numText: {
-        fontSize: 14,
-        fontVariant: ["tabular-nums"]
-    }
+
 })
 
-const timerSelectorItemContentStyles = StyleSheet.create({
-    container: {
-        padding: 8,
-    }
-})
-
-export default TimerSelector
-
-
-
-
-        // .map(timer => ({
-        //     ...timer,
-        //     headerProps: extractHeaderProps(timer),
-        // }))
-        // .map(timer => ({
-        //     ...timer,
-        //     contentProps: extractContentProps(timer)
-        // }))
-        // add selection function to header props
-
-
-
-// const extractContentProps = (timer) => ({
-//     name: timer.name,
-    
-//     currentIntervalName: timer.currentIntervalName,
-//     currentIntervalTimeLeft: timer.currentIntervalTimeLeft,
-    
-//     currentActivityName: timer.currentActivityName,
-//     currentActivityTimeLeftStr: timer.currentActivityTimeLeftStr
-    
-// });
-
-// const extractHeaderProps = (timer) => ({
-//     name: timer.name,
-//     cleared: timer.cleared,
-//     timeLeftStr: timer.timeLeftStr
-// });
+export default TimerSelector;

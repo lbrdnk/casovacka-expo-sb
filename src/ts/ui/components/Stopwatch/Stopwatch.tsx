@@ -17,7 +17,13 @@ export const Stopwatch = (props) => {
         timeStr,
     } = props;
     return (
-        <View style={styles.container}>
+        <View style={[{
+            // borderWidth: 16,
+            // borderBottomColor: "transparent",
+            // borderRightColor: "transparent",
+            // borderTopColor: "white",
+            // borderLeftColor: "white",
+        }, styles.container, { backgroundColor: "transparent" }]}>
             <Text style={styles.timerText}>{timeStr}</Text>
             <View style={styles.buttonContainer}>
                 <Button
@@ -34,7 +40,7 @@ export const Stopwatch = (props) => {
                         textStyle={styles.buttonText}
                         text="Stop"
                         onPress={stopTimerFn}
-                        />
+                    />
                 ) : (
                     <Button
                         style={styles.button}

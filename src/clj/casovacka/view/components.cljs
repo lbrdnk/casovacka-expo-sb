@@ -42,6 +42,7 @@
        :start-timer-fn (fn [] (rf/dispatch [:view.stopwatch-tab/start-timer-pressed]))
        :stop-timer-fn (fn [] (rf/dispatch [:view.stopwatch-tab/stop-timer-pressed]))
        :is-timer-running is-timer-running
+       :active-color @(rf/subscribe [:active-color])
       ;; :is-timer-cleared is-timer-cleared
        }])))
 
@@ -51,7 +52,10 @@
   #_nil
   (let [render-header-args (clj->js (select-keys props [:navigation :route :options :back]))
         active-color @(rf/subscribe [:active-color])
-        child-props (merge props {:active-color active-color})
+        title @(rf/subscribe [:view.stopwatch-screen/title])
+        child-props (merge props {:active-color active-color
+                                  :title title})
         ]
+    (prn title)
   ;; (prn (:js-props props))
     [:> NavigationHeader child-props]))

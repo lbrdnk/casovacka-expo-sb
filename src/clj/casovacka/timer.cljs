@@ -163,8 +163,34 @@
           (first interval-maps)
           (rest interval-maps))))))
 
+(defn current-interval-bak [timer]
+  (try
+    (-> timer :ms->interval-end (subseq >= (passed-time-ms timer)) first second)
+    (catch :defatult e
+      10000)))
+
 (defn current-interval [timer]
-  (-> timer :ms->interval-end (subseq >= (passed-time-ms timer)) first second))
+  ;; (prn "KOKOCIT")
+  ;; (throw (js/Error. "jebo"))
+  ;; (prn "G")
+  (try
+    ;; 1
+    ;; (throw (js/Error. "kokot"))
+    (-> timer :ms->interval-end (subseq >= (passed-time-ms timer)) first second)
+    (catch :default e
+      #_10000
+
+      ;; means :ms->interval-end was not computed first
+      (-> (precompute-intervals timer) first second)
+      
+      
+      )))
+
+(comment
+  (def timer (-> @re-frame.db/app-db :timers vals first))
+  (-> (precompute-intervals timer) first second)
+  (current-interval timer)
+  )
 
 
 (defn current-interval-signal [timer]
@@ -263,12 +289,10 @@
 
 
   (-> (partition-by (fn [[k v]] (:activity-id v)) (-> timer :ms->interval-end (subseq >= (passed-time-ms timer))))
-      last first)
-
-  )
+      last first))
 
 (defn current-interval-end-ms [timer]
-  
+
   (-> timer :ms->interval-end (subseq >= (passed-time-ms timer)
                                       ;; first [end-time interval] tuple -> end-time
                                       )
@@ -276,8 +300,71 @@
 
 (defn current-interval-time-left-str [timer]
   (if (contains? timer :ms->interval-end)
-   (-> (- (current-interval-end-ms timer)
-          (passed-time-ms timer))
-       util/ms->h-m-s
-       util/h-m-s->str)
+    (-> (- (current-interval-end-ms timer)
+           (passed-time-ms timer))
+        util/ms->h-m-s
+        util/h-m-s->str)
     nil))
+
+;; KOKOT JAKO
+(defn next-activity [timer]
+
+  ;; current interval, cur act -> next act
+  (let [current-activity (current-activity timer)
+        current-activity-id (:id current-activity)
+        order (-> timer :activities :order)
+        next-activity-id (-> (drop-while #(not (= % current-activity-id)) order) second)
+        next-activity (get-in timer [:activities :data next-activity-id])
+        ]
+    
+    ;; (prn current-activity-id)
+    ;; (prn next-activity-id)
+    next-activity
+    ))
+
+(defn next-activity-name [timer]
+  (-> (:label (next-activity timer))))
+
+(defn current-activity-name [timer]
+  (-> (:label (current-activity timer))))
+
+(comment
+  (current-activity-name timer)
+  (next-activity timer)
+
+  (def timer (-> @re-frame.db/app-db :timers vals first))
+  ()
+  (current-activity-name timer)
+
+  (current-activity timer)
+  (current-interval timer)
+
+  
+
+  )
+
+(defn current-interval-name [timer]
+  (:label (current-interval timer)))
+
+
+
+(defn next-interval [timer]
+  (try
+    (-> timer :ms->interval-end (subseq >= (passed-time-ms timer)) second second)
+    (catch :default e
+      (-> (precompute-intervals timer) second second))))
+
+(defn next-interval-name [timer]
+  (:label (next-interval timer)))
+
+(comment
+  (def timer (-> @re-frame.db/app-db :timers vals first))
+  (current-interval-name timer)
+  timer
+  (next-interval timer)
+  (next-interval-name timer)
+  
+
+
+  
+  )

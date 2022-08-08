@@ -216,7 +216,29 @@
         
         ;; ;; color
         ;; (map )
+
+        ;; isSelected
+        (map (fn [timer]
+               (let [active-timer-id (:view.stopwatch-tab/selected-timer-id db)]
+                 (assoc timer "isSelected" (= active-timer-id (:id timer))))
+               ))
         
+        (map (fn [timer]
+               (assoc timer 
+                      "selectTimerFn" 
+                      #(rf/dispatch [:view.stopwatch-tab/timer-list-item-pressed (:id timer)]))))
+        
+        (map (fn [timer]
+               (assoc timer
+                      "currentActivityName" (timer/current-activity-name timer)
+                      "nextActivityName" (timer/next-activity-name timer)
+                      "currentIntervalName" (timer/current-interval-name timer)
+                      "nextIntervalName" (timer/next-interval-name timer)
+                      )))
+
+        (map (fn [timer]
+               (assoc timer :running (timer/running? timer))))
+
         )))
 
 
@@ -232,4 +254,13 @@
          selected-timer (get-in db [:timers selected-timer-id])]
      (if selected-timer
        (:color selected-timer)
-       "gray"))))
+       "transparent"))))
+
+
+;; TODO FINISH CICINA
+(rf/reg-sub
+ :view.stopwatch-screen/title
+ (fn [db _]
+   (let [selected-timer-id (:view.stopwatch-tab/selected-timer-id db)
+         selected-timer (get-in db [:timers selected-timer-id])]
+     (or (:name selected-timer) "CICINA"))))
